@@ -1,0 +1,13 @@
+# API keys / secrets
+.env
+.env.*
+.claude/launch.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
