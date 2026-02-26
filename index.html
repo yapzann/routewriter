@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RouteWriter – HVAC Route Optimizer</title>
+  <title>RouteWriter – HVAC Tools</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -43,8 +43,7 @@
     }
 
     /* ── Header ─────────────────────────────────────────────────────── */
-    header { text-align: center; margin-bottom: 2rem; }
-
+    header { text-align: center; margin-bottom: 1.5rem; }
     header .logo {
       display: inline-flex; align-items: center; gap: .5rem;
       margin-bottom: .4rem;
@@ -56,6 +55,23 @@
     }
     header p { color: var(--gray-600); font-size: .95rem; margin-top: .3rem; }
 
+    /* ── Tab nav ─────────────────────────────────────────────────────── */
+    .tab-nav {
+      display: flex; gap: .4rem; margin-bottom: 1.25rem;
+      background: #fff; border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: .4rem;
+      width: 100%; max-width: 740px;
+    }
+    .tab-btn {
+      flex: 1; padding: .55rem .5rem; border: none; border-radius: 7px;
+      font-size: .88rem; font-weight: 600; cursor: pointer;
+      background: transparent; color: var(--gray-600);
+      transition: background .15s, color .15s;
+      display: flex; align-items: center; justify-content: center; gap: .4rem;
+    }
+    .tab-btn:hover { background: var(--gray-100); color: var(--gray-800); }
+    .tab-btn.active { background: var(--blue); color: #fff; }
+
     /* ── Main card ───────────────────────────────────────────────────── */
     .card {
       background: #fff;
@@ -65,6 +81,10 @@
       width: 100%;
       max-width: 740px;
     }
+
+    /* ── Tab panels ──────────────────────────────────────────────────── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
 
     /* ── Section headers ─────────────────────────────────────────────── */
     .section-header {
@@ -76,7 +96,6 @@
       display: flex; align-items: center; gap: .45rem;
     }
     .section-title svg { color: var(--blue); }
-
     .section-divider {
       border: none; border-top: 1.5px solid var(--gray-200);
       margin: 1.5rem 0;
@@ -84,7 +103,6 @@
 
     /* ── Dynamic rows ────────────────────────────────────────────────── */
     .row-list { display: flex; flex-direction: column; gap: .6rem; }
-
     .input-row {
       display: grid; gap: .5rem; align-items: center;
       padding: .65rem .75rem;
@@ -94,27 +112,33 @@
     }
     .input-row.tech-row { grid-template-columns: 1fr 2fr auto; }
     .input-row.job-row  { grid-template-columns: 1fr 2fr auto; }
+    .input-row.item-row { grid-template-columns: 2fr .6fr .9fr auto; }
 
-    .row-num {
-      display: none; /* only shown on larger screens via media query */
-    }
-
-    input[type="text"] {
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    input[type="date"],
+    textarea,
+    select {
       width: 100%; border: 1.5px solid var(--gray-200); border-radius: 6px;
       padding: .5rem .7rem; font-size: .875rem; font-family: inherit;
       color: var(--gray-800); background: #fff;
       transition: border-color .18s, box-shadow .18s; outline: none;
     }
-    input[type="text"]:focus {
+    input:focus, textarea:focus, select:focus {
       border-color: var(--blue);
       box-shadow: 0 0 0 3px rgba(26,111,196,.15);
     }
-    input[type="text"]::placeholder { color: var(--gray-400); }
+    input::placeholder, textarea::placeholder { color: var(--gray-400); }
+    textarea { resize: vertical; min-height: 72px; }
 
     .col-label {
       font-size: .7rem; font-weight: 600; text-transform: uppercase;
-      letter-spacing: .05em; color: var(--gray-400);
-      margin-bottom: .2rem;
+      letter-spacing: .05em; color: var(--gray-400); margin-bottom: .2rem;
+    }
+    .field-label {
+      font-size: .82rem; font-weight: 600; color: var(--gray-600);
+      display: block; margin-bottom: .3rem;
     }
 
     /* Remove button */
@@ -127,7 +151,7 @@
     .btn-remove:hover { background: var(--red-bg); color: var(--red); }
     .btn-remove:disabled { opacity: 0; pointer-events: none; }
 
-    /* Add button */
+    /* Add row button */
     .btn-add {
       display: inline-flex; align-items: center; gap: .4rem;
       margin-top: .6rem; padding: .45rem .9rem;
@@ -138,8 +162,8 @@
     }
     .btn-add:hover { background: var(--blue-mid); }
 
-    /* ── Submit button ───────────────────────────────────────────────── */
-    button[type="submit"] {
+    /* ── Submit / action buttons ─────────────────────────────────────── */
+    .btn-primary {
       width: 100%; padding: .85rem; margin-top: 1.5rem;
       background: var(--blue); color: #fff; border: none;
       border-radius: 7px; font-size: 1rem; font-weight: 700;
@@ -147,9 +171,29 @@
       justify-content: center; gap: .5rem;
       transition: background .18s, transform .1s;
     }
-    button[type="submit"]:hover:not(:disabled) { background: var(--blue-dark); }
-    button[type="submit"]:active:not(:disabled) { transform: scale(.98); }
-    button[type="submit"]:disabled { opacity: .65; cursor: not-allowed; }
+    .btn-primary:hover:not(:disabled) { background: var(--blue-dark); }
+    .btn-primary:active:not(:disabled) { transform: scale(.98); }
+    .btn-primary:disabled { opacity: .65; cursor: not-allowed; }
+
+    .btn-green {
+      background: var(--green); color: #fff; border: none;
+      border-radius: 7px; font-size: .88rem; font-weight: 700;
+      cursor: pointer; padding: .55rem 1.1rem;
+      display: inline-flex; align-items: center; gap: .4rem;
+      transition: background .15s;
+    }
+    .btn-green:hover:not(:disabled) { background: #15803d; }
+    .btn-green:disabled { opacity: .5; cursor: not-allowed; }
+
+    .btn-sm {
+      padding: .3rem .7rem; font-size: .78rem; font-weight: 600;
+      border: none; border-radius: 6px; cursor: pointer;
+      transition: background .15s;
+    }
+    .btn-sm.btn-blue { background: var(--blue-light); color: var(--blue); }
+    .btn-sm.btn-blue:hover { background: var(--blue-mid); }
+    .btn-sm.btn-red  { background: var(--red-bg); color: var(--red); }
+    .btn-sm.btn-red:hover  { background: #fecaca; }
 
     .spinner {
       width: 18px; height: 18px;
@@ -159,25 +203,21 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Error banner ────────────────────────────────────────────────── */
+    /* ── Messages ────────────────────────────────────────────────────── */
     .msg {
       border-radius: 7px; padding: .85rem 1rem;
       font-size: .9rem; margin-top: 1.25rem; display: none;
     }
-    .msg.error {
-      background: var(--red-bg); color: var(--red);
-      border: 1px solid #fca5a5;
-    }
+    .msg.error   { background: var(--red-bg);   color: var(--red);   border: 1px solid #fca5a5; }
+    .msg.success { background: var(--green-bg);  color: var(--green); border: 1px solid var(--green-border); }
 
-    /* ── Results ─────────────────────────────────────────────────────── */
+    /* ── Route results ───────────────────────────────────────────────── */
     #results { margin-top: 1.75rem; display: none; }
-
     .results-header {
       display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 1rem; flex-wrap: wrap; gap: .5rem;
     }
     .results-header h2 { font-size: 1.05rem; font-weight: 700; }
-
     .badge {
       border-radius: 20px; padding: .28rem .8rem;
       font-size: .78rem; font-weight: 700; white-space: nowrap;
@@ -185,76 +225,122 @@
     .badge-blue  { background: var(--blue-light);  color: var(--blue); }
     .badge-green { background: var(--green-bg);    color: var(--green); }
     .badge-amber { background: var(--amber-bg);    color: var(--amber); }
+    .badge-red   { background: var(--red-bg);      color: var(--red); }
 
-    /* Tech cards grid */
     .tech-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 1rem;
     }
-
-    .tech-card {
-      border: 1.5px solid var(--gray-200); border-radius: 9px;
-      overflow: hidden;
-    }
-
+    .tech-card { border: 1.5px solid var(--gray-200); border-radius: 9px; overflow: hidden; }
     .tech-card-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: .65rem .9rem;
-      background: var(--blue); color: #fff;
+      padding: .65rem .9rem; background: var(--blue); color: #fff;
       flex-wrap: wrap; gap: .4rem;
     }
-    .tech-card-header .tech-name {
-      font-weight: 700; font-size: .95rem;
-    }
-    .tech-card-header .tech-start {
-      font-size: .72rem; opacity: .8; width: 100%;
-    }
-
+    .tech-card-header .tech-name { font-weight: 700; font-size: .95rem; }
+    .tech-card-header .tech-start { font-size: .72rem; opacity: .8; width: 100%; }
     .tech-card-body { padding: .75rem .9rem; }
-
-    /* Stop list inside a tech card */
     .stop-list { list-style: none; display: flex; flex-direction: column; gap: .4rem; }
-
     .stop-list li {
       display: flex; align-items: flex-start; gap: .6rem;
       padding: .55rem .7rem; border-radius: 6px;
       background: var(--gray-50); border: 1px solid var(--gray-200);
       font-size: .85rem; line-height: 1.4;
     }
-
     .stop-num {
       flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
       background: var(--blue); color: #fff;
       font-size: .7rem; font-weight: 700;
       display: flex; align-items: center; justify-content: center;
     }
-
     .stop-job  { font-weight: 600; color: var(--gray-800); }
     .stop-addr { font-size: .78rem; color: var(--gray-600); margin-top: .1rem; }
-
-    .no-jobs {
-      color: var(--gray-400); font-size: .85rem;
-      font-style: italic; padding: .4rem 0;
-    }
-
-    /* Summary footer */
+    .no-jobs   { color: var(--gray-400); font-size: .85rem; font-style: italic; padding: .4rem 0; }
     .summary-row {
       margin-top: 1.25rem; display: flex; align-items: center; gap: .5rem;
       padding: .75rem 1rem; background: var(--green-bg);
       border-radius: 7px; border: 1px solid var(--green-border);
       font-size: .9rem; font-weight: 600; color: var(--green);
     }
-    .summary-row svg { flex-shrink: 0; }
+
+    /* ── Quote form ──────────────────────────────────────────────────── */
+    .form-grid-2 {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .form-field { margin-bottom: 1rem; }
+
+    .quote-totals {
+      background: var(--gray-50); border: 1.5px solid var(--gray-200);
+      border-radius: 8px; padding: 1rem 1.25rem; margin-top: 1rem;
+    }
+    .totals-row {
+      display: flex; justify-content: space-between;
+      font-size: .9rem; padding: .25rem 0;
+    }
+    .totals-row.total-final {
+      font-size: 1.05rem; font-weight: 800; color: var(--green);
+      border-top: 1.5px solid var(--gray-200); margin-top: .4rem; padding-top: .6rem;
+    }
+
+    /* Quote history table */
+    .history-table {
+      width: 100%; border-collapse: collapse; font-size: .85rem; margin-top: 1rem;
+    }
+    .history-table th {
+      text-align: left; padding: .5rem .75rem;
+      background: var(--gray-100); color: var(--gray-600);
+      font-size: .75rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .history-table td {
+      padding: .6rem .75rem; border-top: 1px solid var(--gray-200);
+      color: var(--gray-800);
+    }
+    .history-table tr:hover td { background: var(--gray-50); }
+    .empty-state {
+      text-align: center; padding: 2rem; color: var(--gray-400);
+      font-size: .9rem; font-style: italic;
+    }
+
+    /* ── Customers tab ───────────────────────────────────────────────── */
+    .customers-toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: .75rem; margin-bottom: 1.25rem;
+    }
+    .add-customer-form {
+      background: var(--gray-50); border: 1.5px solid var(--gray-200);
+      border-radius: 9px; padding: 1.25rem; margin-bottom: 1.5rem;
+      display: none;
+    }
+    .add-customer-form.open { display: block; }
+    .add-customer-form .form-grid-2 { margin-bottom: 0; }
+
+    .customers-table {
+      width: 100%; border-collapse: collapse; font-size: .85rem;
+    }
+    .customers-table th {
+      text-align: left; padding: .5rem .75rem;
+      background: var(--gray-100); color: var(--gray-600);
+      font-size: .75rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .customers-table td {
+      padding: .65rem .75rem; border-top: 1px solid var(--gray-200);
+      vertical-align: middle;
+    }
+    .customers-table tr:hover td { background: var(--gray-50); }
+    .customers-table .actions { display: flex; gap: .4rem; }
 
     /* ── Responsive ──────────────────────────────────────────────────── */
-    @media (max-width: 520px) {
+    @media (max-width: 560px) {
+      .form-grid-2 { grid-template-columns: 1fr; }
       .input-row.tech-row,
-      .input-row.job-row { grid-template-columns: 1fr auto; }
-      .input-row.tech-row > div:first-child,
-      .input-row.job-row  > div:first-child { grid-column: 1; }
-      .input-row.tech-row > div:nth-child(2),
-      .input-row.job-row  > div:nth-child(2) { grid-column: 1; }
+      .input-row.job-row  { grid-template-columns: 1fr auto; }
+      .input-row.item-row { grid-template-columns: 1fr .8fr auto; }
+      .input-row.item-row > div:first-child { grid-column: 1 / -1; }
+      .tab-btn span.tab-label { display: none; }
     }
   </style>
 </head>
@@ -269,40 +355,53 @@
     </svg>
     <h1>RouteWriter</h1>
   </div>
-  <p>Smart route optimization for HVAC service teams</p>
+  <p>Smart tools for HVAC service teams</p>
 </header>
 
+<!-- ── Tab navigation ───────────────────────────────────────────────────────── -->
+<nav class="tab-nav" role="tablist">
+  <button class="tab-btn active" data-tab="routes" role="tab">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+    <span class="tab-label">Route Optimizer</span>
+  </button>
+  <button class="tab-btn" data-tab="quotes" role="tab">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    <span class="tab-label">Quote Generator</span>
+  </button>
+  <button class="tab-btn" data-tab="customers" role="tab">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <span class="tab-label">Customers</span>
+  </button>
+</nav>
+
 <div class="card">
+
+<!-- ════════════════════════════════════════════════════════════════════════════
+     TAB 1 · Route Optimizer
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="tab-panel active" id="tab-routes">
   <form id="routeForm" novalidate>
 
-    <!-- ── Technicians ─────────────────────────────────────────────── -->
+    <!-- Technicians -->
     <div class="section-header">
       <span class="section-title">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
-             stroke-linejoin="round">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-          <circle cx="9" cy="7" r="4"/>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
         </svg>
         Technicians
       </span>
       <span class="badge badge-blue" id="techCount">1 technician</span>
     </div>
 
-    <!-- Column labels -->
     <div style="display:grid;grid-template-columns:1fr 2fr auto;gap:.5rem;padding:0 .75rem;margin-bottom:.35rem;">
       <span class="col-label">Name</span>
       <span class="col-label">Starting address</span>
       <span></span>
     </div>
-
     <div class="row-list" id="techList"></div>
-
     <button type="button" class="btn-add" id="addTechBtn">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
         <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
       </svg>
       Add Technician
@@ -310,14 +409,11 @@
 
     <hr class="section-divider" />
 
-    <!-- ── Jobs ──────────────────────────────────────────────────────── -->
+    <!-- Jobs -->
     <div class="section-header">
       <span class="section-title">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
-             stroke-linejoin="round">
-          <rect x="2" y="7" width="20" height="14" rx="2"/>
-          <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
         </svg>
         Jobs
       </span>
@@ -329,27 +425,23 @@
       <span class="col-label">Location</span>
       <span></span>
     </div>
-
     <div class="row-list" id="jobList"></div>
-
     <button type="button" class="btn-add" id="addJobBtn">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
         <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
       </svg>
       Add Job
     </button>
 
-    <button type="submit" id="submitBtn">
+    <button type="submit" class="btn-primary" id="submitBtn">
       <span id="btnText">Optimize Routes</span>
       <div class="spinner" id="spinner"></div>
     </button>
-
   </form>
 
-  <div class="msg error" id="errorMsg" role="alert"></div>
+  <div class="msg error" id="routeError" role="alert"></div>
 
-  <!-- ── Results ──────────────────────────────────────────────────────── -->
+  <!-- Results -->
   <div id="results">
     <hr class="section-divider" style="margin-top:1.5rem;" />
     <div class="results-header">
@@ -358,151 +450,310 @@
     </div>
     <div class="tech-grid" id="techGrid"></div>
     <div class="summary-row" id="summaryRow">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2.2"
-           stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <polyline points="12 6 12 12 16 14"/>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
       </svg>
       <span id="summaryText"></span>
     </div>
   </div>
 </div>
 
+
+<!-- ════════════════════════════════════════════════════════════════════════════
+     TAB 2 · Quote Generator
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-quotes">
+
+  <div class="section-header">
+    <span class="section-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+      </svg>
+      New Estimate
+    </span>
+  </div>
+
+  <form id="quoteForm" novalidate>
+    <!-- Customer info -->
+    <div class="form-grid-2">
+      <div class="form-field">
+        <label class="field-label" for="qCustomerName">Customer name *</label>
+        <input type="text" id="qCustomerName" placeholder="Jane Smith" />
+      </div>
+      <div class="form-field">
+        <label class="field-label" for="qCustomerEmail">Customer email</label>
+        <input type="email" id="qCustomerEmail" placeholder="jane@example.com" />
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label class="field-label" for="qJobType">Job type</label>
+      <input type="text" id="qJobType" placeholder="e.g. AC Tune-Up, HVAC Install" />
+    </div>
+
+    <hr class="section-divider" />
+
+    <!-- Line items -->
+    <div class="section-header">
+      <span class="section-title">Line Items</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:2fr .6fr .9fr auto;gap:.5rem;padding:0 .75rem;margin-bottom:.35rem;">
+      <span class="col-label">Description</span>
+      <span class="col-label">Qty</span>
+      <span class="col-label">Unit price</span>
+      <span></span>
+    </div>
+    <div class="row-list" id="itemList"></div>
+
+    <button type="button" class="btn-add" id="addItemBtn">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Add Line Item
+    </button>
+
+    <!-- Live totals -->
+    <div class="quote-totals">
+      <div class="totals-row">
+        <span>Subtotal</span>
+        <span id="qSubtotal">$0.00</span>
+      </div>
+      <div class="totals-row" style="align-items:center;">
+        <label for="qTaxRate" style="font-size:.9rem;">Tax rate (%)</label>
+        <input type="number" id="qTaxRate" min="0" max="100" step="0.1" value="0"
+               style="width:80px;text-align:right;" />
+      </div>
+      <div class="totals-row">
+        <span>Tax</span>
+        <span id="qTaxAmount">$0.00</span>
+      </div>
+      <div class="totals-row total-final">
+        <span>TOTAL</span>
+        <span id="qTotal">$0.00</span>
+      </div>
+    </div>
+
+    <div class="form-field" style="margin-top:1rem;">
+      <label class="field-label" for="qNotes">Notes (optional)</label>
+      <textarea id="qNotes" placeholder="Payment terms, warranty info, etc."></textarea>
+    </div>
+
+    <button type="submit" class="btn-primary" id="quoteSubmitBtn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      <span id="quoteBtnText">Generate PDF</span>
+      <div class="spinner" id="quoteSpinner"></div>
+    </button>
+  </form>
+
+  <div class="msg error"   id="quoteError"   role="alert"></div>
+  <div class="msg success" id="quoteSuccess" role="status"></div>
+
+  <!-- Quote history -->
+  <hr class="section-divider" style="margin-top:2rem;" />
+  <div class="section-header">
+    <span class="section-title">Recent Quotes</span>
+    <button type="button" class="btn-sm btn-blue" id="refreshQuotesBtn">Refresh</button>
+  </div>
+  <div id="quoteHistoryWrap">
+    <p class="empty-state">Loading quotes…</p>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════════════════════
+     TAB 3 · Customers
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-customers">
+
+  <div class="customers-toolbar">
+    <span class="section-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      Customer List
+    </span>
+    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
+      <span class="badge badge-red" id="dueCount" style="display:none;"></span>
+      <button type="button" class="btn-green" id="sendRemindersBtn" disabled>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+        Send Reminder Emails
+      </button>
+      <button type="button" class="btn-sm btn-blue" id="toggleAddCustomer">+ Add Customer</button>
+    </div>
+  </div>
+
+  <!-- Add customer form (collapsed by default) -->
+  <div class="add-customer-form" id="addCustomerForm">
+    <div style="font-weight:700;font-size:.95rem;margin-bottom:.9rem;color:var(--gray-800);">New Customer</div>
+    <div class="form-grid-2">
+      <div class="form-field">
+        <label class="field-label" for="cName">Name *</label>
+        <input type="text" id="cName" placeholder="John Smith" />
+      </div>
+      <div class="form-field">
+        <label class="field-label" for="cEmail">Email</label>
+        <input type="email" id="cEmail" placeholder="john@example.com" />
+      </div>
+      <div class="form-field">
+        <label class="field-label" for="cPhone">Phone</label>
+        <input type="text" id="cPhone" placeholder="(555) 123-4567" />
+      </div>
+      <div class="form-field">
+        <label class="field-label" for="cLastService">Last service date</label>
+        <input type="date" id="cLastService" />
+      </div>
+    </div>
+    <div class="form-field">
+      <label class="field-label" for="cAddress">Address</label>
+      <input type="text" id="cAddress" placeholder="123 Main St, City, TX 78701" />
+    </div>
+    <div class="form-field" style="margin-bottom:0;">
+      <label class="field-label" for="cNotes">Notes</label>
+      <textarea id="cNotes" placeholder="Equipment details, access codes, preferences…"></textarea>
+    </div>
+    <div style="display:flex;gap:.6rem;margin-top:1rem;">
+      <button type="button" class="btn-green" id="saveCustomerBtn">Save Customer</button>
+      <button type="button" class="btn-sm btn-red" id="cancelAddCustomer" style="padding:.45rem .9rem;">Cancel</button>
+    </div>
+    <div class="msg error" id="addCustomerError" role="alert" style="margin-top:.75rem;"></div>
+  </div>
+
+  <div class="msg success" id="customerSuccess" role="status"></div>
+  <div class="msg error"   id="customerError"   role="alert"></div>
+
+  <div id="customerTableWrap">
+    <p class="empty-state">Loading customers…</p>
+  </div>
+</div>
+
+</div><!-- /.card -->
+
 <script>
-// ── Helpers ────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════════════
+// Utilities
+// ════════════════════════════════════════════════════════════════════════════
 const $ = id => document.getElementById(id);
 
+function fmt$(n) {
+  return '$' + Number(n || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
 function fmtTime(mins) {
   if (mins === 0) return '0 min';
   const h = Math.floor(mins / 60), m = mins % 60;
   return h > 0 ? `${h}h ${m}m` : `${m} min`;
 }
-
-function setLoading(on) {
-  $('submitBtn').disabled = on;
-  $('btnText').textContent = on ? 'Optimizing…' : 'Optimize Routes';
-  $('spinner').style.display = on ? 'block' : 'none';
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso + 'T12:00:00');
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
-
-function showError(msg) {
-  const el = $('errorMsg');
-  el.textContent = msg;
-  el.style.display = 'block';
-}
-
-function clearError() {
-  $('errorMsg').style.display = 'none';
-  $('errorMsg').textContent = '';
-}
-
-// ── Dynamic row management ─────────────────────────────────────────────────
-let techRows = [];
-let jobRows  = [];
-
 function makeSVGRemove() {
-  return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-    stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+  return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    stroke-width="2.5" stroke-linecap="round">
     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
   </svg>`;
 }
+function showMsg(el, text, type = 'error') {
+  el.className = `msg ${type}`;
+  el.textContent = text;
+  el.style.display = 'block';
+  if (type === 'success') setTimeout(() => { el.style.display = 'none'; }, 5000);
+}
+function hideMsg(el) { el.style.display = 'none'; }
+
+// ════════════════════════════════════════════════════════════════════════════
+// Tab navigation
+// ════════════════════════════════════════════════════════════════════════════
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    $('tab-' + btn.dataset.tab).classList.add('active');
+
+    // Lazy-load data when switching tabs
+    if (btn.dataset.tab === 'quotes')    loadQuoteHistory();
+    if (btn.dataset.tab === 'customers') loadCustomers();
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// TAB 1 · Route Optimizer
+// ════════════════════════════════════════════════════════════════════════════
+let techRows = [], jobRows = [];
 
 function addTechRow(name = '', addr = '') {
-  const id = Date.now() + Math.random();
   const row = document.createElement('div');
   row.className = 'input-row tech-row';
-  row.dataset.id = id;
   row.innerHTML = `
-    <div>
-      <input type="text" class="tech-name" placeholder="e.g. Alice" value="${name}" />
-    </div>
-    <div>
-      <input type="text" class="tech-addr" placeholder="123 Main St, City, TX" value="${addr}" />
-    </div>
-    <button type="button" class="btn-remove" title="Remove">${makeSVGRemove()}</button>
-  `;
+    <div><input type="text" class="tech-name" placeholder="e.g. Alice" value="${name}" /></div>
+    <div><input type="text" class="tech-addr" placeholder="123 Main St, City, TX" value="${addr}" /></div>
+    <button type="button" class="btn-remove" title="Remove">${makeSVGRemove()}</button>`;
   row.querySelector('.btn-remove').addEventListener('click', () => {
     if (techRows.length <= 1) return;
-    row.remove();
-    techRows = techRows.filter(r => r !== row);
-    updateCounts();
+    row.remove(); techRows = techRows.filter(r => r !== row); updateRouteCounts();
   });
   $('techList').appendChild(row);
   techRows.push(row);
-  updateCounts();
+  updateRouteCounts();
 }
 
 function addJobRow(name = '', loc = '') {
-  const id = Date.now() + Math.random();
   const row = document.createElement('div');
   row.className = 'input-row job-row';
-  row.dataset.id = id;
   row.innerHTML = `
-    <div>
-      <input type="text" class="job-name" placeholder="e.g. AC Repair" value="${name}" />
-    </div>
-    <div>
-      <input type="text" class="job-loc" placeholder="456 Oak Ave, City, TX" value="${loc}" />
-    </div>
-    <button type="button" class="btn-remove" title="Remove">${makeSVGRemove()}</button>
-  `;
+    <div><input type="text" class="job-name" placeholder="e.g. AC Repair" value="${name}" /></div>
+    <div><input type="text" class="job-loc"  placeholder="456 Oak Ave, City, TX" value="${loc}" /></div>
+    <button type="button" class="btn-remove" title="Remove">${makeSVGRemove()}</button>`;
   row.querySelector('.btn-remove').addEventListener('click', () => {
     if (jobRows.length <= 1) return;
-    row.remove();
-    jobRows = jobRows.filter(r => r !== row);
-    updateCounts();
+    row.remove(); jobRows = jobRows.filter(r => r !== row); updateRouteCounts();
   });
   $('jobList').appendChild(row);
   jobRows.push(row);
-  updateCounts();
+  updateRouteCounts();
 }
 
-function updateCounts() {
-  // Update remove button disabled state
-  techRows.forEach(r => {
-    r.querySelector('.btn-remove').disabled = techRows.length <= 1;
-  });
-  jobRows.forEach(r => {
-    r.querySelector('.btn-remove').disabled = jobRows.length <= 1;
-  });
-
-  const tc = techRows.length;
+function updateRouteCounts() {
+  techRows.forEach(r => { r.querySelector('.btn-remove').disabled = techRows.length <= 1; });
+  jobRows.forEach(r  => { r.querySelector('.btn-remove').disabled = jobRows.length  <= 1; });
+  const tc = techRows.length, jc = jobRows.length;
   $('techCount').textContent = `${tc} technician${tc !== 1 ? 's' : ''}`;
-  const jc = jobRows.length;
-  $('jobCount').textContent = `${jc} job${jc !== 1 ? 's' : ''}`;
+  $('jobCount').textContent  = `${jc} job${jc !== 1 ? 's' : ''}`;
 }
 
 $('addTechBtn').addEventListener('click', () => {
-  if (techRows.length >= 10) { showError('Maximum 10 technicians allowed.'); return; }
+  if (techRows.length >= 10) { showMsg($('routeError'), 'Maximum 10 technicians allowed.'); return; }
   addTechRow();
 });
-
 $('addJobBtn').addEventListener('click', () => {
-  if (jobRows.length >= 24) { showError('Maximum 24 jobs allowed.'); return; }
+  if (jobRows.length >= 24) { showMsg($('routeError'), 'Maximum 24 jobs allowed.'); return; }
   addJobRow();
 });
 
-// Seed with one blank row each
-addTechRow();
-addJobRow();
+addTechRow(); addJobRow();
 
-// ── Results rendering ──────────────────────────────────────────────────────
-function renderResults(data) {
+function renderRouteResults(data) {
   const grid = $('techGrid');
   grid.innerHTML = '';
-
   data.assignments.forEach(a => {
     const card = document.createElement('div');
     card.className = 'tech-card';
-
     const timeBadge = a.drive_time_minutes > 0
       ? `<span class="badge badge-green" style="font-size:.72rem;">${fmtTime(a.drive_time_minutes)}</span>`
       : `<span class="badge badge-amber" style="font-size:.72rem;">No jobs</span>`;
-
     card.innerHTML = `
       <div class="tech-card-header">
-        <span class="tech-name">${a.technician}</span>
-        ${timeBadge}
+        <span class="tech-name">${a.technician}</span>${timeBadge}
         <span class="tech-start">From: ${a.start_location}</span>
       </div>
       <div class="tech-card-body">
@@ -516,70 +767,343 @@ function renderResults(data) {
                   <div class="stop-addr">${s.location}</div>
                 </div>
               </li>`).join('')}
-            </ol>`
-        }
-      </div>
-    `;
+            </ol>`}
+      </div>`;
     grid.appendChild(card);
   });
-
   $('resultsBadge').textContent =
     `${data.total_jobs} job${data.total_jobs !== 1 ? 's' : ''} · ${data.assignments.length} tech${data.assignments.length !== 1 ? 's' : ''}`;
-
   $('summaryText').textContent =
     `Total estimated drive time across all technicians: ${fmtTime(data.total_drive_time_minutes)}`;
-
   $('results').style.display = 'block';
 }
 
-// ── Form submit ────────────────────────────────────────────────────────────
 $('routeForm').addEventListener('submit', async e => {
   e.preventDefault();
-  clearError();
+  hideMsg($('routeError'));
   $('results').style.display = 'none';
 
-  // Collect technicians
-  const technicians = techRows.map((row, i) => ({
-    name: row.querySelector('.tech-name').value.trim() || `Technician ${i + 1}`,
-    start_location: row.querySelector('.tech-addr').value.trim(),
+  const technicians = techRows.map((r, i) => ({
+    name: r.querySelector('.tech-name').value.trim() || `Technician ${i + 1}`,
+    start_location: r.querySelector('.tech-addr').value.trim(),
+  }));
+  const jobs = jobRows.map((r, i) => ({
+    name: r.querySelector('.job-name').value.trim() || `Job ${i + 1}`,
+    location: r.querySelector('.job-loc').value.trim(),
   }));
 
-  // Collect jobs
-  const jobs = jobRows.map((row, i) => ({
-    name: row.querySelector('.job-name').value.trim() || `Job ${i + 1}`,
-    location: row.querySelector('.job-loc').value.trim(),
-  }));
-
-  // Client-side validation
   const missingTech = technicians.find(t => !t.start_location);
-  if (missingTech) {
-    showError(`Please enter a starting address for ${missingTech.name}.`);
-    return;
-  }
+  if (missingTech) { showMsg($('routeError'), `Please enter a starting address for ${missingTech.name}.`); return; }
   const missingJob = jobs.find(j => !j.location);
-  if (missingJob) {
-    showError(`Please enter a location for "${missingJob.name}".`);
-    return;
-  }
+  if (missingJob)  { showMsg($('routeError'), `Please enter a location for "${missingJob.name}".`); return; }
 
-  setLoading(true);
+  $('submitBtn').disabled = true;
+  $('btnText').textContent = 'Optimizing…';
+  $('spinner').style.display = 'block';
   try {
-    const res = await fetch('/optimize', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ technicians, jobs }),
-    });
+    const res  = await fetch('/optimize', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({technicians, jobs}) });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || `Server error (${res.status})`);
-    renderResults(data);
+    renderRouteResults(data);
   } catch (err) {
-    showError(
+    showMsg($('routeError'),
       err.name === 'TypeError'
-        ? 'Could not reach the server. Make sure the backend is running on port 8080.'
-        : err.message || 'An unexpected error occurred.'
-    );
+        ? 'Could not reach the server.'
+        : err.message || 'An unexpected error occurred.');
   } finally {
-    setLoading(false);
+    $('submitBtn').disabled = false;
+    $('btnText').textContent = 'Optimize Routes';
+    $('spinner').style.display = 'none';
+  }
+});
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// TAB 2 · Quote Generator
+// ════════════════════════════════════════════════════════════════════════════
+let itemRows = [];
+
+function addItemRow(desc = '', qty = 1, unitPrice = '') {
+  const row = document.createElement('div');
+  row.className = 'input-row item-row';
+  row.innerHTML = `
+    <div><input type="text"   class="item-desc"  placeholder="Labour / part description" value="${desc}" /></div>
+    <div><input type="number" class="item-qty"   min="0.01" step="any" value="${qty}" /></div>
+    <div><input type="number" class="item-price" min="0"    step="0.01" placeholder="0.00" value="${unitPrice}" /></div>
+    <button type="button" class="btn-remove" title="Remove">${makeSVGRemove()}</button>`;
+  row.querySelector('.btn-remove').addEventListener('click', () => {
+    if (itemRows.length <= 1) return;
+    row.remove(); itemRows = itemRows.filter(r => r !== row); updateQuoteTotals();
+  });
+  row.querySelectorAll('input').forEach(i => i.addEventListener('input', updateQuoteTotals));
+  $('itemList').appendChild(row);
+  itemRows.push(row);
+  updateQuoteTotals();
+}
+
+function updateQuoteTotals() {
+  itemRows.forEach(r => { r.querySelector('.btn-remove').disabled = itemRows.length <= 1; });
+  const taxPct   = parseFloat($('qTaxRate').value) || 0;
+  const subtotal = itemRows.reduce((sum, r) => {
+    const qty   = parseFloat(r.querySelector('.item-qty').value)   || 0;
+    const price = parseFloat(r.querySelector('.item-price').value) || 0;
+    return sum + qty * price;
+  }, 0);
+  const taxAmt = subtotal * (taxPct / 100);
+  $('qSubtotal').textContent  = fmt$(subtotal);
+  $('qTaxAmount').textContent = fmt$(taxAmt);
+  $('qTotal').textContent     = fmt$(subtotal + taxAmt);
+}
+
+$('addItemBtn').addEventListener('click', () => addItemRow());
+$('qTaxRate').addEventListener('input', updateQuoteTotals);
+addItemRow();
+
+$('quoteForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  hideMsg($('quoteError'));
+  hideMsg($('quoteSuccess'));
+
+  const customerName = $('qCustomerName').value.trim();
+  if (!customerName) { showMsg($('quoteError'), 'Customer name is required.'); return; }
+
+  const lineItems = itemRows.map(r => ({
+    desc:       r.querySelector('.item-desc').value.trim() || 'Item',
+    qty:        parseFloat(r.querySelector('.item-qty').value)   || 1,
+    unit_price: parseFloat(r.querySelector('.item-price').value) || 0,
+  }));
+  if (lineItems.every(i => i.unit_price === 0)) {
+    showMsg($('quoteError'), 'Please enter a price for at least one line item.'); return;
+  }
+
+  const payload = {
+    customer_name:  customerName,
+    customer_email: $('qCustomerEmail').value.trim(),
+    job_type:       $('qJobType').value.trim(),
+    line_items:     lineItems,
+    tax_rate:       (parseFloat($('qTaxRate').value) || 0) / 100,
+    notes:          $('qNotes').value.trim(),
+  };
+
+  $('quoteSubmitBtn').disabled = true;
+  $('quoteBtnText').textContent = 'Generating…';
+  $('quoteSpinner').style.display = 'block';
+
+  try {
+    const res = await fetch('/quotes', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || `Server error (${res.status})`);
+    }
+
+    // Trigger PDF download
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = `quote-${Date.now()}.pdf`; a.click();
+    URL.revokeObjectURL(url);
+
+    showMsg($('quoteSuccess'), 'Quote generated and downloaded!', 'success');
+    loadQuoteHistory();
+  } catch (err) {
+    showMsg($('quoteError'), err.message || 'An unexpected error occurred.');
+  } finally {
+    $('quoteSubmitBtn').disabled = false;
+    $('quoteBtnText').textContent = 'Generate PDF';
+    $('quoteSpinner').style.display = 'none';
+  }
+});
+
+async function loadQuoteHistory() {
+  const wrap = $('quoteHistoryWrap');
+  try {
+    const res  = await fetch('/quotes');
+    const data = await res.json();
+    if (!data.length) {
+      wrap.innerHTML = '<p class="empty-state">No quotes yet.</p>'; return;
+    }
+    wrap.innerHTML = `
+      <table class="history-table">
+        <thead><tr>
+          <th>#</th><th>Customer</th><th>Job type</th>
+          <th style="text-align:right;">Total</th><th>Date</th>
+        </tr></thead>
+        <tbody>${data.map(q => `
+          <tr>
+            <td>${q.id}</td>
+            <td>${q.customer_name}</td>
+            <td>${q.job_type || '—'}</td>
+            <td style="text-align:right;font-weight:600;">${fmt$(q.total)}</td>
+            <td>${fmtDate(q.created_at)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+  } catch {
+    wrap.innerHTML = '<p class="empty-state" style="color:var(--red);">Could not load quotes.</p>';
+  }
+}
+
+$('refreshQuotesBtn').addEventListener('click', loadQuoteHistory);
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// TAB 3 · Customers
+// ════════════════════════════════════════════════════════════════════════════
+let customersCache = [];
+
+$('toggleAddCustomer').addEventListener('click', () => {
+  const form = $('addCustomerForm');
+  form.classList.toggle('open');
+  $('toggleAddCustomer').textContent = form.classList.contains('open') ? '✕ Cancel' : '+ Add Customer';
+  if (!form.classList.contains('open')) clearAddCustomerForm();
+});
+$('cancelAddCustomer').addEventListener('click', () => {
+  $('addCustomerForm').classList.remove('open');
+  $('toggleAddCustomer').textContent = '+ Add Customer';
+  clearAddCustomerForm();
+});
+
+function clearAddCustomerForm() {
+  ['cName','cEmail','cPhone','cAddress','cLastService','cNotes'].forEach(id => { $(id).value = ''; });
+  hideMsg($('addCustomerError'));
+}
+
+$('saveCustomerBtn').addEventListener('click', async () => {
+  hideMsg($('addCustomerError'));
+  const name = $('cName').value.trim();
+  if (!name) { showMsg($('addCustomerError'), 'Name is required.'); return; }
+
+  const payload = {
+    name,
+    email:             $('cEmail').value.trim(),
+    phone:             $('cPhone').value.trim(),
+    address:           $('cAddress').value.trim(),
+    last_service_date: $('cLastService').value || null,
+    notes:             $('cNotes').value.trim(),
+  };
+
+  try {
+    const res  = await fetch('/customers', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
+    clearAddCustomerForm();
+    $('addCustomerForm').classList.remove('open');
+    $('toggleAddCustomer').textContent = '+ Add Customer';
+    showMsg($('customerSuccess'), `Customer "${data.name}" added.`, 'success');
+    loadCustomers();
+  } catch (err) {
+    showMsg($('addCustomerError'), err.message || 'Could not save customer.');
+  }
+});
+
+async function recordService(customerId) {
+  const today = new Date().toISOString().split('T')[0];
+  try {
+    const res = await fetch(`/customers/${customerId}`, {
+      method: 'PUT', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ last_service_date: today }),
+    });
+    if (!res.ok) throw new Error('Failed to update.');
+    showMsg($('customerSuccess'), 'Service date updated to today.', 'success');
+    loadCustomers();
+  } catch (err) {
+    showMsg($('customerError'), err.message);
+  }
+}
+
+async function deleteCustomer(customerId, name) {
+  if (!confirm(`Delete customer "${name}"? This cannot be undone.`)) return;
+  try {
+    const res = await fetch(`/customers/${customerId}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Failed to delete.');
+    showMsg($('customerSuccess'), `"${name}" removed.`, 'success');
+    loadCustomers();
+  } catch (err) {
+    showMsg($('customerError'), err.message);
+  }
+}
+
+async function loadCustomers() {
+  const wrap = $('customerTableWrap');
+  try {
+    const res  = await fetch('/customers');
+    customersCache = await res.json();
+    const due  = customersCache.filter(c => c.is_due);
+
+    // Update "due" badge and send button
+    const dueCount = $('dueCount');
+    if (due.length > 0) {
+      dueCount.textContent = `${due.length} due for service`;
+      dueCount.style.display = 'inline-block';
+      $('sendRemindersBtn').disabled = false;
+    } else {
+      dueCount.style.display = 'none';
+      $('sendRemindersBtn').disabled = true;
+    }
+
+    if (!customersCache.length) {
+      wrap.innerHTML = '<p class="empty-state">No customers yet. Add your first one above.</p>'; return;
+    }
+
+    wrap.innerHTML = `
+      <table class="customers-table">
+        <thead><tr>
+          <th>Name</th><th>Email</th><th>Phone</th>
+          <th>Last Service</th><th>Status</th><th></th>
+        </tr></thead>
+        <tbody>${customersCache.map(c => `
+          <tr>
+            <td style="font-weight:600;">${c.name}</td>
+            <td>${c.email || '—'}</td>
+            <td>${c.phone || '—'}</td>
+            <td>${fmtDate(c.last_service_date)}</td>
+            <td>
+              ${c.is_due
+                ? `<span class="badge badge-red">Due</span>`
+                : `<span class="badge badge-green">OK</span>`}
+            </td>
+            <td>
+              <div class="actions">
+                <button class="btn-sm btn-blue" onclick="recordService(${c.id})">✓ Serviced</button>
+                <button class="btn-sm btn-red"  onclick="deleteCustomer(${c.id}, '${c.name.replace(/'/g,"\\'")}')">Delete</button>
+              </div>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+  } catch {
+    wrap.innerHTML = '<p class="empty-state" style="color:var(--red);">Could not load customers.</p>';
+  }
+}
+
+$('sendRemindersBtn').addEventListener('click', async () => {
+  const due = customersCache.filter(c => c.is_due);
+  const withEmail = due.filter(c => c.email);
+  if (!confirm(`Send reminder emails to ${withEmail.length} customer(s) due for service?`)) return;
+
+  $('sendRemindersBtn').disabled = true;
+  $('sendRemindersBtn').textContent = 'Sending…';
+  hideMsg($('customerError'));
+  hideMsg($('customerSuccess'));
+
+  try {
+    const res  = await fetch('/reminders/send', { method: 'POST' });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
+    showMsg($('customerSuccess'), data.message, 'success');
+  } catch (err) {
+    showMsg($('customerError'), err.message || 'Could not send reminders.');
+  } finally {
+    $('sendRemindersBtn').disabled = false;
+    $('sendRemindersBtn').innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg> Send Reminder Emails`;
   }
 });
 </script>

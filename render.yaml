@@ -7,3 +7,17 @@ services:
     envVars:
       - key: GOOGLE_MAPS_API_KEY
         sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: routewriter-db
+          property: connectionString
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: FROM_EMAIL
+        sync: false
+      - key: COMPANY_NAME
+        sync: false
+
+databases:
+  - name: routewriter-db
+    plan: free
