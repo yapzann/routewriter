@@ -5,25 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RouteWriter – HVAC Route Optimizer</title>
   <style>
-    /* ── Reset & base ────────────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --blue:       #1a6fc4;
-      --blue-dark:  #145aa0;
-      --blue-light: #dbeafe;
-      --green:      #16a34a;
-      --green-bg:   #dcfce7;
-      --red:        #dc2626;
-      --red-bg:     #fee2e2;
-      --gray-50:    #f8fafc;
-      --gray-100:   #f1f5f9;
-      --gray-200:   #e2e8f0;
-      --gray-400:   #94a3b8;
-      --gray-600:   #475569;
-      --gray-800:   #1e293b;
-      --radius:     10px;
-      --shadow:     0 4px 24px rgba(0,0,0,.08);
+      --blue:        #1a6fc4;
+      --blue-dark:   #145aa0;
+      --blue-light:  #dbeafe;
+      --blue-mid:    #bfdbfe;
+      --green:       #16a34a;
+      --green-bg:    #dcfce7;
+      --green-border:#86efac;
+      --red:         #dc2626;
+      --red-bg:      #fee2e2;
+      --amber:       #d97706;
+      --amber-bg:    #fef3c7;
+      --gray-50:     #f8fafc;
+      --gray-100:    #f1f5f9;
+      --gray-200:    #e2e8f0;
+      --gray-300:    #cbd5e1;
+      --gray-400:    #94a3b8;
+      --gray-600:    #475569;
+      --gray-800:    #1e293b;
+      --radius:      10px;
+      --shadow:      0 4px 24px rgba(0,0,0,.08);
     }
 
     body {
@@ -35,258 +39,229 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 2rem 1rem 4rem;
+      padding: 2rem 1rem 5rem;
     }
 
-    /* ── Header ─────────────────────────────────────────────────────────── */
-    header {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
+    /* ── Header ─────────────────────────────────────────────────────── */
+    header { text-align: center; margin-bottom: 2rem; }
 
     header .logo {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      margin-bottom: .5rem;
+      display: inline-flex; align-items: center; gap: .5rem;
+      margin-bottom: .4rem;
     }
-
-    header .logo svg {
-      width: 36px; height: 36px;
-    }
-
+    header .logo svg { width: 36px; height: 36px; }
     header h1 {
-      font-size: 1.9rem;
-      font-weight: 800;
-      color: var(--blue);
-      letter-spacing: -.5px;
+      font-size: 1.9rem; font-weight: 800;
+      color: var(--blue); letter-spacing: -.5px;
     }
+    header p { color: var(--gray-600); font-size: .95rem; margin-top: .3rem; }
 
-    header p {
-      color: var(--gray-600);
-      font-size: .95rem;
-      margin-top: .3rem;
-    }
-
-    /* ── Card ────────────────────────────────────────────────────────────── */
+    /* ── Main card ───────────────────────────────────────────────────── */
     .card {
       background: #fff;
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       padding: 2rem;
       width: 100%;
-      max-width: 640px;
+      max-width: 740px;
     }
 
-    /* ── Form elements ───────────────────────────────────────────────────── */
-    label {
-      display: block;
-      font-weight: 600;
-      font-size: .875rem;
-      color: var(--gray-800);
-      margin-bottom: .4rem;
+    /* ── Section headers ─────────────────────────────────────────────── */
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-size: 1rem; font-weight: 700; color: var(--gray-800);
+      display: flex; align-items: center; gap: .45rem;
+    }
+    .section-title svg { color: var(--blue); }
+
+    .section-divider {
+      border: none; border-top: 1.5px solid var(--gray-200);
+      margin: 1.5rem 0;
     }
 
-    label .hint {
-      font-weight: 400;
-      color: var(--gray-400);
-      font-size: .8rem;
-      margin-left: .3rem;
-    }
+    /* ── Dynamic rows ────────────────────────────────────────────────── */
+    .row-list { display: flex; flex-direction: column; gap: .6rem; }
 
-    input[type="text"],
-    textarea {
-      width: 100%;
-      border: 1.5px solid var(--gray-200);
-      border-radius: 7px;
-      padding: .65rem .85rem;
-      font-size: .95rem;
-      font-family: inherit;
-      color: var(--gray-800);
+    .input-row {
+      display: grid; gap: .5rem; align-items: center;
+      padding: .65rem .75rem;
       background: var(--gray-50);
-      transition: border-color .18s, box-shadow .18s;
-      outline: none;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 8px;
+    }
+    .input-row.tech-row { grid-template-columns: 1fr 2fr auto; }
+    .input-row.job-row  { grid-template-columns: 1fr 2fr auto; }
+
+    .row-num {
+      display: none; /* only shown on larger screens via media query */
     }
 
-    input[type="text"]:focus,
-    textarea:focus {
+    input[type="text"] {
+      width: 100%; border: 1.5px solid var(--gray-200); border-radius: 6px;
+      padding: .5rem .7rem; font-size: .875rem; font-family: inherit;
+      color: var(--gray-800); background: #fff;
+      transition: border-color .18s, box-shadow .18s; outline: none;
+    }
+    input[type="text"]:focus {
       border-color: var(--blue);
       box-shadow: 0 0 0 3px rgba(26,111,196,.15);
-      background: #fff;
+    }
+    input[type="text"]::placeholder { color: var(--gray-400); }
+
+    .col-label {
+      font-size: .7rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .05em; color: var(--gray-400);
+      margin-bottom: .2rem;
     }
 
-    textarea {
-      resize: vertical;
-      min-height: 140px;
-      line-height: 1.55;
+    /* Remove button */
+    .btn-remove {
+      width: 28px; height: 28px; border-radius: 6px; border: none;
+      background: transparent; cursor: pointer; color: var(--gray-400);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: background .15s, color .15s;
     }
+    .btn-remove:hover { background: var(--red-bg); color: var(--red); }
+    .btn-remove:disabled { opacity: 0; pointer-events: none; }
 
-    .field { margin-bottom: 1.25rem; }
+    /* Add button */
+    .btn-add {
+      display: inline-flex; align-items: center; gap: .4rem;
+      margin-top: .6rem; padding: .45rem .9rem;
+      background: var(--blue-light); color: var(--blue);
+      border: 1.5px solid var(--blue-mid); border-radius: 7px;
+      font-size: .82rem; font-weight: 700; cursor: pointer;
+      transition: background .15s;
+    }
+    .btn-add:hover { background: var(--blue-mid); }
 
-    /* ── Button ──────────────────────────────────────────────────────────── */
+    /* ── Submit button ───────────────────────────────────────────────── */
     button[type="submit"] {
-      width: 100%;
-      padding: .8rem;
-      background: var(--blue);
-      color: #fff;
-      border: none;
-      border-radius: 7px;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
+      width: 100%; padding: .85rem; margin-top: 1.5rem;
+      background: var(--blue); color: #fff; border: none;
+      border-radius: 7px; font-size: 1rem; font-weight: 700;
+      cursor: pointer; display: flex; align-items: center;
+      justify-content: center; gap: .5rem;
       transition: background .18s, transform .1s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: .5rem;
-      margin-top: .25rem;
     }
-
     button[type="submit"]:hover:not(:disabled) { background: var(--blue-dark); }
     button[type="submit"]:active:not(:disabled) { transform: scale(.98); }
-    button[type="submit"]:disabled {
-      opacity: .65;
-      cursor: not-allowed;
-    }
+    button[type="submit"]:disabled { opacity: .65; cursor: not-allowed; }
 
-    /* Spinner */
     .spinner {
       width: 18px; height: 18px;
       border: 2.5px solid rgba(255,255,255,.4);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-      display: none;
+      border-top-color: #fff; border-radius: 50%;
+      animation: spin .7s linear infinite; display: none;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Messages ────────────────────────────────────────────────────────── */
+    /* ── Error banner ────────────────────────────────────────────────── */
     .msg {
-      border-radius: 7px;
-      padding: .85rem 1rem;
-      font-size: .9rem;
-      margin-top: 1.25rem;
-      display: none;
+      border-radius: 7px; padding: .85rem 1rem;
+      font-size: .9rem; margin-top: 1.25rem; display: none;
     }
-
     .msg.error {
-      background: var(--red-bg);
-      color: var(--red);
+      background: var(--red-bg); color: var(--red);
       border: 1px solid #fca5a5;
     }
 
-    /* ── Results ─────────────────────────────────────────────────────────── */
-    #results {
-      margin-top: 1.5rem;
-      display: none;
-    }
+    /* ── Results ─────────────────────────────────────────────────────── */
+    #results { margin-top: 1.75rem; display: none; }
 
     .results-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1rem;
-      flex-wrap: wrap;
-      gap: .5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem; flex-wrap: wrap; gap: .5rem;
     }
-
-    .results-header h2 {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--gray-800);
-    }
+    .results-header h2 { font-size: 1.05rem; font-weight: 700; }
 
     .badge {
-      background: var(--blue-light);
-      color: var(--blue);
-      border-radius: 20px;
-      padding: .3rem .85rem;
-      font-size: .82rem;
-      font-weight: 700;
-      white-space: nowrap;
+      border-radius: 20px; padding: .28rem .8rem;
+      font-size: .78rem; font-weight: 700; white-space: nowrap;
+    }
+    .badge-blue  { background: var(--blue-light);  color: var(--blue); }
+    .badge-green { background: var(--green-bg);    color: var(--green); }
+    .badge-amber { background: var(--amber-bg);    color: var(--amber); }
+
+    /* Tech cards grid */
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
     }
 
-    .divider {
-      border: none;
-      border-top: 1.5px solid var(--gray-200);
-      margin: .75rem 0 1rem;
+    .tech-card {
+      border: 1.5px solid var(--gray-200); border-radius: 9px;
+      overflow: hidden;
     }
 
-    .stop-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: .55rem;
+    .tech-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .65rem .9rem;
+      background: var(--blue); color: #fff;
+      flex-wrap: wrap; gap: .4rem;
     }
+    .tech-card-header .tech-name {
+      font-weight: 700; font-size: .95rem;
+    }
+    .tech-card-header .tech-start {
+      font-size: .72rem; opacity: .8; width: 100%;
+    }
+
+    .tech-card-body { padding: .75rem .9rem; }
+
+    /* Stop list inside a tech card */
+    .stop-list { list-style: none; display: flex; flex-direction: column; gap: .4rem; }
 
     .stop-list li {
-      display: flex;
-      align-items: flex-start;
-      gap: .75rem;
-      padding: .7rem .9rem;
-      border-radius: 7px;
-      background: var(--gray-50);
-      border: 1px solid var(--gray-200);
-      font-size: .9rem;
-      line-height: 1.4;
-    }
-
-    .stop-list li:first-child {
-      background: var(--blue-light);
-      border-color: #bfdbfe;
+      display: flex; align-items: flex-start; gap: .6rem;
+      padding: .55rem .7rem; border-radius: 6px;
+      background: var(--gray-50); border: 1px solid var(--gray-200);
+      font-size: .85rem; line-height: 1.4;
     }
 
     .stop-num {
-      flex-shrink: 0;
-      width: 26px; height: 26px;
-      border-radius: 50%;
-      background: var(--blue);
-      color: #fff;
-      font-size: .75rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+      background: var(--blue); color: #fff;
+      font-size: .7rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
     }
 
-    .stop-list li:first-child .stop-num {
-      background: var(--blue-dark);
+    .stop-job  { font-weight: 600; color: var(--gray-800); }
+    .stop-addr { font-size: .78rem; color: var(--gray-600); margin-top: .1rem; }
+
+    .no-jobs {
+      color: var(--gray-400); font-size: .85rem;
+      font-style: italic; padding: .4rem 0;
     }
 
-    .stop-label {
-      font-weight: 600;
-      font-size: .7rem;
-      text-transform: uppercase;
-      letter-spacing: .05em;
-      color: var(--blue);
-      display: block;
-      margin-bottom: .1rem;
-    }
-
-    .stop-addr { color: var(--gray-800); }
-
+    /* Summary footer */
     .summary-row {
-      margin-top: 1rem;
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-      padding: .75rem 1rem;
-      background: var(--green-bg);
-      border-radius: 7px;
-      border: 1px solid #86efac;
-      font-size: .9rem;
-      font-weight: 600;
-      color: var(--green);
+      margin-top: 1.25rem; display: flex; align-items: center; gap: .5rem;
+      padding: .75rem 1rem; background: var(--green-bg);
+      border-radius: 7px; border: 1px solid var(--green-border);
+      font-size: .9rem; font-weight: 600; color: var(--green);
     }
-
     .summary-row svg { flex-shrink: 0; }
+
+    /* ── Responsive ──────────────────────────────────────────────────── */
+    @media (max-width: 520px) {
+      .input-row.tech-row,
+      .input-row.job-row { grid-template-columns: 1fr auto; }
+      .input-row.tech-row > div:first-child,
+      .input-row.job-row  > div:first-child { grid-column: 1; }
+      .input-row.tech-row > div:nth-child(2),
+      .input-row.job-row  > div:nth-child(2) { grid-column: 1; }
+    }
   </style>
 </head>
 <body>
 
 <header>
   <div class="logo">
-    <!-- simple HVAC wrench icon -->
     <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect width="36" height="36" rx="8" fill="#1a6fc4"/>
       <path d="M24 8a6 6 0 0 0-5.83 7.42L8.7 24.88a2 2 0 1 0 2.83 2.83l9.46-9.47A6 6 0 1 0 24 8zm0 10a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"
@@ -294,42 +269,79 @@
     </svg>
     <h1>RouteWriter</h1>
   </div>
-  <p>Smart route optimization for HVAC service contractors</p>
+  <p>Smart route optimization for HVAC service teams</p>
 </header>
 
 <div class="card">
   <form id="routeForm" novalidate>
 
-    <div class="field">
-      <label for="startLocation">
-        Starting address
-        <span class="hint">e.g. 123 Main St, Austin, TX 78701</span>
-      </label>
-      <input
-        type="text"
-        id="startLocation"
-        name="startLocation"
-        placeholder="Your warehouse or home base…"
-        autocomplete="street-address"
-        required
-      />
+    <!-- ── Technicians ─────────────────────────────────────────────── -->
+    <div class="section-header">
+      <span class="section-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+             stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        Technicians
+      </span>
+      <span class="badge badge-blue" id="techCount">1 technician</span>
     </div>
 
-    <div class="field">
-      <label for="jobLocations">
-        Job addresses
-        <span class="hint">one per line · max 24</span>
-      </label>
-      <textarea
-        id="jobLocations"
-        name="jobLocations"
-        placeholder="456 Oak Ave, Austin, TX 78702&#10;789 Pine Rd, Austin, TX 78703&#10;…"
-        required
-      ></textarea>
+    <!-- Column labels -->
+    <div style="display:grid;grid-template-columns:1fr 2fr auto;gap:.5rem;padding:0 .75rem;margin-bottom:.35rem;">
+      <span class="col-label">Name</span>
+      <span class="col-label">Starting address</span>
+      <span></span>
     </div>
+
+    <div class="row-list" id="techList"></div>
+
+    <button type="button" class="btn-add" id="addTechBtn">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Add Technician
+    </button>
+
+    <hr class="section-divider" />
+
+    <!-- ── Jobs ──────────────────────────────────────────────────────── -->
+    <div class="section-header">
+      <span class="section-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+             stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2"/>
+          <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+        </svg>
+        Jobs
+      </span>
+      <span class="badge badge-blue" id="jobCount">1 job</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 2fr auto;gap:.5rem;padding:0 .75rem;margin-bottom:.35rem;">
+      <span class="col-label">Job name <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></span>
+      <span class="col-label">Location</span>
+      <span></span>
+    </div>
+
+    <div class="row-list" id="jobList"></div>
+
+    <button type="button" class="btn-add" id="addJobBtn">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Add Job
+    </button>
 
     <button type="submit" id="submitBtn">
-      <span id="btnText">Optimize Route</span>
+      <span id="btnText">Optimize Routes</span>
       <div class="spinner" id="spinner"></div>
     </button>
 
@@ -337,13 +349,14 @@
 
   <div class="msg error" id="errorMsg" role="alert"></div>
 
+  <!-- ── Results ──────────────────────────────────────────────────────── -->
   <div id="results">
-    <hr class="divider" />
+    <hr class="section-divider" style="margin-top:1.5rem;" />
     <div class="results-header">
-      <h2>Optimized Stop Order</h2>
-      <span class="badge" id="stopsBadge"></span>
+      <h2>Optimized Assignments</h2>
+      <span class="badge badge-blue" id="resultsBadge"></span>
     </div>
-    <ol class="stop-list" id="stopList"></ol>
+    <div class="tech-grid" id="techGrid"></div>
     <div class="summary-row" id="summaryRow">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
            stroke="currentColor" stroke-width="2.2"
@@ -357,129 +370,218 @@
 </div>
 
 <script>
-  const form       = document.getElementById('routeForm');
-  const submitBtn  = document.getElementById('submitBtn');
-  const btnText    = document.getElementById('btnText');
-  const spinner    = document.getElementById('spinner');
-  const errorMsg   = document.getElementById('errorMsg');
-  const results    = document.getElementById('results');
-  const stopList   = document.getElementById('stopList');
-  const stopsBadge = document.getElementById('stopsBadge');
-  const summaryText= document.getElementById('summaryText');
+// ── Helpers ────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
 
-  function setLoading(on) {
-    submitBtn.disabled = on;
-    btnText.textContent = on ? 'Optimizing…' : 'Optimize Route';
-    spinner.style.display = on ? 'block' : 'none';
-  }
+function fmtTime(mins) {
+  if (mins === 0) return '0 min';
+  const h = Math.floor(mins / 60), m = mins % 60;
+  return h > 0 ? `${h}h ${m}m` : `${m} min`;
+}
 
-  function showError(msg) {
-    errorMsg.textContent = msg;
-    errorMsg.style.display = 'block';
-  }
+function setLoading(on) {
+  $('submitBtn').disabled = on;
+  $('btnText').textContent = on ? 'Optimizing…' : 'Optimize Routes';
+  $('spinner').style.display = on ? 'block' : 'none';
+}
 
-  function clearError() {
-    errorMsg.style.display = 'none';
-    errorMsg.textContent   = '';
-  }
+function showError(msg) {
+  const el = $('errorMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
 
-  function renderResults(data) {
-    stopList.innerHTML = '';
-    const route = data.optimized_route;
+function clearError() {
+  $('errorMsg').style.display = 'none';
+  $('errorMsg').textContent = '';
+}
 
-    route.forEach((address, idx) => {
-      const li = document.createElement('li');
+// ── Dynamic row management ─────────────────────────────────────────────────
+let techRows = [];
+let jobRows  = [];
 
-      const numEl = document.createElement('div');
-      numEl.className = 'stop-num';
-      numEl.textContent = idx + 1;
+function makeSVGRemove() {
+  return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+  </svg>`;
+}
 
-      const bodyEl = document.createElement('div');
-
-      if (idx === 0) {
-        const labelEl = document.createElement('span');
-        labelEl.className = 'stop-label';
-        labelEl.textContent = 'Start';
-        bodyEl.appendChild(labelEl);
-      }
-
-      const addrEl = document.createElement('span');
-      addrEl.className = 'stop-addr';
-      addrEl.textContent = address;
-      bodyEl.appendChild(addrEl);
-
-      li.appendChild(numEl);
-      li.appendChild(bodyEl);
-      stopList.appendChild(li);
-    });
-
-    const jobCount = data.stop_count;
-    stopsBadge.textContent = `${jobCount} job${jobCount !== 1 ? 's' : ''}`;
-
-    const mins = data.total_drive_time_minutes;
-    const hours = Math.floor(mins / 60);
-    const remaining = mins % 60;
-    const timeStr = hours > 0
-      ? `${hours}h ${remaining}m`
-      : `${remaining} min`;
-
-    summaryText.textContent = `Estimated total drive time: ${timeStr}`;
-    results.style.display = 'block';
-  }
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    clearError();
-    results.style.display = 'none';
-
-    const startLocation = document.getElementById('startLocation').value.trim();
-    const rawJobs = document.getElementById('jobLocations').value;
-    const jobLocations = rawJobs
-      .split('\n')
-      .map(l => l.trim())
-      .filter(l => l.length > 0);
-
-    // Client-side validation
-    if (!startLocation) {
-      showError('Please enter a starting address.');
-      return;
-    }
-    if (jobLocations.length === 0) {
-      showError('Please enter at least one job address.');
-      return;
-    }
-    if (jobLocations.length > 24) {
-      showError('You can enter a maximum of 24 job addresses at once.');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const response = await fetch('/optimize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ start_location: startLocation, job_locations: jobLocations }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || `Server error (${response.status})`);
-      }
-
-      renderResults(data);
-
-    } catch (err) {
-      if (err.name === 'TypeError') {
-        showError('Could not reach the server. Make sure the backend is running on port 5000.');
-      } else {
-        showError(err.message || 'An unexpected error occurred.');
-      }
-    } finally {
-      setLoading(false);
-    }
+function addTechRow(name = '', addr = '') {
+  const id = Date.now() + Math.random();
+  const row = document.createElement('div');
+  row.className = 'input-row tech-row';
+  row.dataset.id = id;
+  row.innerHTML = `
+    <div>
+      <input type="text" class="tech-name" placeholder="e.g. Alice" value="${name}" />
+    </div>
+    <div>
+      <input type="text" class="tech-addr" placeholder="123 Main St, City, TX" value="${addr}" />
+    </div>
+    <button type="button" class="btn-remove" title="Remove">${makeSVGRemove()}</button>
+  `;
+  row.querySelector('.btn-remove').addEventListener('click', () => {
+    if (techRows.length <= 1) return;
+    row.remove();
+    techRows = techRows.filter(r => r !== row);
+    updateCounts();
   });
+  $('techList').appendChild(row);
+  techRows.push(row);
+  updateCounts();
+}
+
+function addJobRow(name = '', loc = '') {
+  const id = Date.now() + Math.random();
+  const row = document.createElement('div');
+  row.className = 'input-row job-row';
+  row.dataset.id = id;
+  row.innerHTML = `
+    <div>
+      <input type="text" class="job-name" placeholder="e.g. AC Repair" value="${name}" />
+    </div>
+    <div>
+      <input type="text" class="job-loc" placeholder="456 Oak Ave, City, TX" value="${loc}" />
+    </div>
+    <button type="button" class="btn-remove" title="Remove">${makeSVGRemove()}</button>
+  `;
+  row.querySelector('.btn-remove').addEventListener('click', () => {
+    if (jobRows.length <= 1) return;
+    row.remove();
+    jobRows = jobRows.filter(r => r !== row);
+    updateCounts();
+  });
+  $('jobList').appendChild(row);
+  jobRows.push(row);
+  updateCounts();
+}
+
+function updateCounts() {
+  // Update remove button disabled state
+  techRows.forEach(r => {
+    r.querySelector('.btn-remove').disabled = techRows.length <= 1;
+  });
+  jobRows.forEach(r => {
+    r.querySelector('.btn-remove').disabled = jobRows.length <= 1;
+  });
+
+  const tc = techRows.length;
+  $('techCount').textContent = `${tc} technician${tc !== 1 ? 's' : ''}`;
+  const jc = jobRows.length;
+  $('jobCount').textContent = `${jc} job${jc !== 1 ? 's' : ''}`;
+}
+
+$('addTechBtn').addEventListener('click', () => {
+  if (techRows.length >= 10) { showError('Maximum 10 technicians allowed.'); return; }
+  addTechRow();
+});
+
+$('addJobBtn').addEventListener('click', () => {
+  if (jobRows.length >= 24) { showError('Maximum 24 jobs allowed.'); return; }
+  addJobRow();
+});
+
+// Seed with one blank row each
+addTechRow();
+addJobRow();
+
+// ── Results rendering ──────────────────────────────────────────────────────
+function renderResults(data) {
+  const grid = $('techGrid');
+  grid.innerHTML = '';
+
+  data.assignments.forEach(a => {
+    const card = document.createElement('div');
+    card.className = 'tech-card';
+
+    const timeBadge = a.drive_time_minutes > 0
+      ? `<span class="badge badge-green" style="font-size:.72rem;">${fmtTime(a.drive_time_minutes)}</span>`
+      : `<span class="badge badge-amber" style="font-size:.72rem;">No jobs</span>`;
+
+    card.innerHTML = `
+      <div class="tech-card-header">
+        <span class="tech-name">${a.technician}</span>
+        ${timeBadge}
+        <span class="tech-start">From: ${a.start_location}</span>
+      </div>
+      <div class="tech-card-body">
+        ${a.stops.length === 0
+          ? `<p class="no-jobs">No jobs assigned</p>`
+          : `<ol class="stop-list">${a.stops.map((s, i) => `
+              <li>
+                <div class="stop-num">${i + 1}</div>
+                <div>
+                  <div class="stop-job">${s.job_name}</div>
+                  <div class="stop-addr">${s.location}</div>
+                </div>
+              </li>`).join('')}
+            </ol>`
+        }
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  $('resultsBadge').textContent =
+    `${data.total_jobs} job${data.total_jobs !== 1 ? 's' : ''} · ${data.assignments.length} tech${data.assignments.length !== 1 ? 's' : ''}`;
+
+  $('summaryText').textContent =
+    `Total estimated drive time across all technicians: ${fmtTime(data.total_drive_time_minutes)}`;
+
+  $('results').style.display = 'block';
+}
+
+// ── Form submit ────────────────────────────────────────────────────────────
+$('routeForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  clearError();
+  $('results').style.display = 'none';
+
+  // Collect technicians
+  const technicians = techRows.map((row, i) => ({
+    name: row.querySelector('.tech-name').value.trim() || `Technician ${i + 1}`,
+    start_location: row.querySelector('.tech-addr').value.trim(),
+  }));
+
+  // Collect jobs
+  const jobs = jobRows.map((row, i) => ({
+    name: row.querySelector('.job-name').value.trim() || `Job ${i + 1}`,
+    location: row.querySelector('.job-loc').value.trim(),
+  }));
+
+  // Client-side validation
+  const missingTech = technicians.find(t => !t.start_location);
+  if (missingTech) {
+    showError(`Please enter a starting address for ${missingTech.name}.`);
+    return;
+  }
+  const missingJob = jobs.find(j => !j.location);
+  if (missingJob) {
+    showError(`Please enter a location for "${missingJob.name}".`);
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const res = await fetch('/optimize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ technicians, jobs }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `Server error (${res.status})`);
+    renderResults(data);
+  } catch (err) {
+    showError(
+      err.name === 'TypeError'
+        ? 'Could not reach the server. Make sure the backend is running on port 8080.'
+        : err.message || 'An unexpected error occurred.'
+    );
+  } finally {
+    setLoading(false);
+  }
+});
 </script>
 </body>
 </html>
